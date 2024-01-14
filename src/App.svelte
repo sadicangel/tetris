@@ -21,12 +21,16 @@
       case 'A':
       case 'ArrowLeft':
         controller.left = true;
+        controller.leftTapped = true;
+        controller.rightTapped = false;
         break;
 
       case 'd':
       case 'D':
       case 'ArrowRight':
         controller.right = true;
+        controller.rightTapped = true;
+        controller.leftTapped = false;
         break;
 
       case 's':
@@ -85,28 +89,38 @@
     }
   });
 
-  let elaspedMs = 0;
+  let elapsedMsHorizontal = 0;
   const horizontalTimeRequired = 90;
-  const verticalSpeed = 0.5;
-  const verticalSpeedBonus = 5;
+  let elapsedMsVertical = 0;
+  const verticalTimeRequired = 1000;
 
   app.ticker.add((deltaTime) => {
-    elaspedMs += app.ticker.elapsedMS;
-    const canMove = elaspedMs >= horizontalTimeRequired;
-    if (canMove) elaspedMs -= horizontalTimeRequired;
     let { x, y } = piece.position;
-    if (canMove && controller.left !== controller.right) {
-      if (controller.left) {
-        if (x > Piece.BLOCK_SIZE) x -= Piece.BLOCK_SIZE;
-      } else {
-        if (x + piece.width < WIDTH - Piece.BLOCK_SIZE) x += Piece.BLOCK_SIZE;
+    const elapsedMS = app.ticker.elapsedMS;
+
+    elapsedMsHorizontal += elapsedMS;
+    const canMoveHorizontally = elapsedMsHorizontal >= horizontalTimeRequired;
+    if (canMoveHorizontally) {
+      elapsedMsHorizontal -= horizontalTimeRequired;
+      const hasAnyDirectionHorizontal =
+        controller.left !== controller.right || controller.leftTapped !== controller.rightTapped;
+      if (hasAnyDirectionHorizontal) {
+        if (controller.left || controller.leftTapped) {
+          if (x > Piece.BLOCK_SIZE) x -= Piece.BLOCK_SIZE;
+        } else {
+          if (x + piece.width < WIDTH - Piece.BLOCK_SIZE) x += Piece.BLOCK_SIZE;
+        }
+        controller.leftTapped = false;
+        controller.rightTapped = false;
       }
     }
 
-    // y += verticalSpeed * deltaTime;
-    // if (controller.down) {
-    //   y += verticalSpeedBonus * deltaTime;
-    // }
+    elapsedMsVertical += elapsedMS;
+    const canMoveVertically = elapsedMsVertical >= verticalTimeRequired;
+    if (canMoveVertically) {
+      elapsedMsVertical -= verticalTimeRequired;
+      y += Piece.BLOCK_SIZE;
+    }
 
     piece.position.set(x, y);
   });
