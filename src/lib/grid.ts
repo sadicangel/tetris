@@ -1,0 +1,48 @@
+import { Container, Sprite } from "pixi.js";
+import { Piece, SPiece } from "./piece";
+import { Config } from "./config";
+
+export class Grid extends Container {
+    cells: Array<boolean>;
+
+    constructor() {
+        super();
+        this.cells = new Array<boolean>(Config.GRID_ROWS * Config.GRID_COLS);
+        this.cells.fill(true);
+    }
+
+    isFree(row: number, col: number) {
+        if (row < 0 || row > Config.GRID_ROWS)
+            return false;
+        if (col < 0 || col >= Config.GRID_COLS)
+            return false;
+        return this.cells[row * Config.GRID_COLS + col];
+    }
+
+    fill(row: number, col: number) {
+        this.cells[row * Config.GRID_COLS + col] = false;
+    }
+
+    canFit(row: number, col: number, piece: Piece): boolean {
+        for (const block of piece.layout) {
+            if (!this.isFree(row + block.row, col + block.col))
+                return false;
+        }
+        return true;
+    }
+
+    place(piece: Piece) {
+        for (const block of piece.layout) {
+            const row = piece.row + block.row;
+            const col = piece.col + block.col;
+            this.fill(row, col);
+            const sprite = new Sprite(block.sprite.texture);
+            sprite.tint = 0xDDDDDD;
+            sprite.position.set(
+                (piece.col + block.col + 1) * Config.BLOCK_SIZE,
+                (piece.row + block.row) * Config.BLOCK_SIZE
+            );
+            this.addChild(sprite);
+        }
+    }
+}

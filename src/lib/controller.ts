@@ -4,6 +4,5 @@ export default {
     leftTapped: false,
     rightTapped: false,
     down: false,
-    rotateLeft: false,
-    rotateRight: false
+    rotate: false,
 }

@@ -3,19 +3,97 @@
   import { Border } from '@lib/border';
   import { Piece, randomPiece } from '@/lib/piece';
   import controller from '@lib/controller';
+  import { Grid } from './lib/grid';
+  import { Config } from './lib/config';
 
-  const { WIDTH, HEIGHT } = Border;
-
-  const app = new Application({ width: WIDTH, height: HEIGHT });
+  const app = new Application({ width: Config.APP_WIDTH, height: Config.APP_HEIGHT });
 
   const border = new Border();
   app.stage.addChild(border);
 
-  let piece = randomPiece();
-  app.stage.addChild(piece);
+  let piece = undefined as any as Piece;
+  let nextPiece = randomPiece();
+  function newPiece() {
+    piece = nextPiece;
+    nextPiece = randomPiece();
+    app.stage.addChild(piece);
+  }
+
+  const grid = new Grid();
+  app.stage.addChild(grid);
+
+  let elapsedMsHorizontal = 0;
+  const horizontalMsRequired = 90;
+  let elapsedMsVertical = 0;
+  const rotateMsRequired = 90;
+  let elapsedMsRotate = 0;
+  const verticalMsRequiredDefault = 1000;
+  const verticalMsRequiredSpeed = 100;
+
+  let canMove = true;
+
+  newPiece();
+
+  function onUpdate(deltaTime: number) {
+    let { x, y } = piece.position;
+    const elapsedMS = app.ticker.elapsedMS;
+
+    elapsedMsHorizontal += elapsedMS;
+    if (elapsedMsHorizontal >= horizontalMsRequired) {
+      elapsedMsHorizontal = 0;
+      if (canMove) {
+        const hasAnyDirectionHorizontal =
+          controller.left !== controller.right || controller.leftTapped !== controller.rightTapped;
+        if (hasAnyDirectionHorizontal) {
+          if (controller.left || controller.leftTapped) {
+            if (grid.canFit(piece.row, piece.col - 1, piece)) x -= Config.BLOCK_SIZE;
+          } else {
+            if (grid.canFit(piece.row, piece.col + 1, piece)) x += Config.BLOCK_SIZE;
+          }
+          controller.leftTapped = false;
+          controller.rightTapped = false;
+        }
+      }
+    }
+
+    elapsedMsRotate += elapsedMS;
+    if (elapsedMsRotate >= rotateMsRequired) {
+      elapsedMsRotate = 0;
+      if (controller.rotate) {
+        piece.rotate();
+      }
+    }
+
+    elapsedMsVertical += elapsedMS;
+    const verticalMsRequired = controller.down
+      ? verticalMsRequiredSpeed
+      : verticalMsRequiredDefault;
+    if (grid.canFit(piece.row + 1, piece.col, piece)) {
+      if (elapsedMsVertical >= verticalMsRequired) {
+        elapsedMsVertical = 0;
+        y += Config.BLOCK_SIZE;
+      }
+    } else if (canMove) {
+      if (elapsedMsVertical >= verticalMsRequired) {
+        elapsedMsVertical = 0;
+        canMove = false;
+      }
+    } else {
+      grid.place(piece);
+      app.stage.removeChild(piece);
+      newPiece();
+      x = piece.x;
+      y = piece.y;
+      canMove = true;
+    }
+
+    piece.position.set(x, y);
+  }
+
+  app.ticker.add(onUpdate);
 
   // Configure bindings.
-  window.addEventListener('keydown', (e) => {
+  function onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'a':
       case 'A':
@@ -41,12 +119,12 @@
 
       case 'q':
       case 'Q':
-        controller.rotateLeft = true;
+        controller.rotate = true;
         break;
 
       case 'e':
       case 'E':
-        controller.rotateLeft = true;
+        controller.rotate = true;
         break;
 
       case ' ':
@@ -55,9 +133,9 @@
         app.stage.addChild(piece);
         break;
     }
-  });
+  }
 
-  window.addEventListener('keyup', (e) => {
+  function onKeyUp(e: KeyboardEvent) {
     switch (e.key) {
       case 'a':
       case 'A':
@@ -79,51 +157,19 @@
 
       case 'q':
       case 'Q':
-        controller.rotateLeft = false;
+        controller.rotate = false;
         break;
 
       case 'e':
       case 'E':
-        controller.rotateLeft = false;
+        controller.rotate = false;
         break;
     }
-  });
-
-  let elapsedMsHorizontal = 0;
-  const horizontalTimeRequired = 90;
-  let elapsedMsVertical = 0;
-  const verticalTimeRequired = 1000;
-
-  app.ticker.add((deltaTime) => {
-    let { x, y } = piece.position;
-    const elapsedMS = app.ticker.elapsedMS;
-
-    elapsedMsHorizontal += elapsedMS;
-    const canMoveHorizontally = elapsedMsHorizontal >= horizontalTimeRequired;
-    if (canMoveHorizontally) {
-      elapsedMsHorizontal -= horizontalTimeRequired;
-      const hasAnyDirectionHorizontal =
-        controller.left !== controller.right || controller.leftTapped !== controller.rightTapped;
-      if (hasAnyDirectionHorizontal) {
-        if (controller.left || controller.leftTapped) {
-          if (x > Piece.BLOCK_SIZE) x -= Piece.BLOCK_SIZE;
-        } else {
-          if (x + piece.width < WIDTH - Piece.BLOCK_SIZE) x += Piece.BLOCK_SIZE;
-        }
-        controller.leftTapped = false;
-        controller.rightTapped = false;
-      }
-    }
-
-    elapsedMsVertical += elapsedMS;
-    const canMoveVertically = elapsedMsVertical >= verticalTimeRequired;
-    if (canMoveVertically) {
-      elapsedMsVertical -= verticalTimeRequired;
-      y += Piece.BLOCK_SIZE;
-    }
-
-    piece.position.set(x, y);
-  });
+  }
+  window.removeEventListener('keydown', onKeyDown);
+  window.removeEventListener('keyup', onKeyUp);
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
 
   // Append to body.
   while (document.body.lastChild) {

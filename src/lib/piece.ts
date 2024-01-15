@@ -1,237 +1,288 @@
-import { Container, Sprite, Texture, TextureUvs } from "pixi.js";
+import { Container, IPointData, ObservablePoint, Sprite, Texture, TextureUvs } from "pixi.js";
 import blocks from "./blocks";
 import { Border } from "./border";
+import { Grid } from "./grid";
+import { Config } from "./config";
 
 export type RotateDirection = 'left' | 'right';
 
-export type Layout = {
-    texture: Texture,
-    x: number,
-    y: number
-}
+export type BlockPosition = { col: number, row: number };
+export type BlockPositionWithSprite = BlockPosition & { sprite: Sprite };
+
+export type Layout = BlockPosition[];
+export type LayoutWithSprite = BlockPositionWithSprite[];
 
 export abstract class Piece extends Container {
-    static readonly BLOCK_SIZE = 30;
     readonly blocks: number;
+    readonly layout: LayoutWithSprite;
     readonly sprites: ReadonlyArray<Sprite>;
-    constructor(layouts: ReadonlyArray<Layout>) {
+
+    get row(): number { return (this.y / Config.BLOCK_SIZE); }
+    get col(): number { return (this.x / Config.BLOCK_SIZE) - 1; }
+
+    constructor(texture: Texture, layout: Layout) {
         super();
-        this.blocks = layouts.length;
+        this.layout = [];
+        this.blocks = this.layout.length;
         const sprites = new Array<Sprite>(this.blocks);
         let i = 0;
-        for (const layout of layouts) {
-            const sprite = sprites[i++] = new Sprite(layout.texture);
+        for (const { row, col } of layout) {
+            const sprite = sprites[i++] = new Sprite(texture);
             this.addChild(sprite);
-            sprite.x = layout.x;
-            sprite.y = layout.y;
+            sprite.x = col * Config.BLOCK_SIZE;
+            sprite.y = row * Config.BLOCK_SIZE;
+            this.layout.push({
+                row: row,
+                col: col,
+                sprite: sprite
+            })
         }
         this.sprites = sprites;
     }
+
+    abstract rotate(): void;
 }
 
 export class IPiece extends Piece {
+    static readonly HORIZONTAL = [
+        {
+            col: 0,
+            row: 0
+        },
+        {
+            col: 1,
+            row: 0
+        },
+        {
+            col: 2,
+            row: 0
+        },
+        {
+            col: 3,
+            row: 0
+        },
+    ];
+    static readonly VERTICAL = [
+        {
+            col: 0,
+            row: 0
+        },
+        {
+            col: 0,
+            row: 1
+        },
+        {
+            col: 0,
+            row: 2
+        },
+        {
+            col: 0,
+            row: 3
+        },
+    ];
     constructor() {
-        super([
-            {
-                texture: blocks.teal,
-                x: 0,
-                y: 0
-            },
-            {
-                texture: blocks.teal,
-                x: Piece.BLOCK_SIZE,
-                y: 0
-            },
-            {
-                texture: blocks.teal,
-                x: 2 * Piece.BLOCK_SIZE,
-                y: 0
-            },
-            {
-                texture: blocks.teal,
-                x: 3 * Piece.BLOCK_SIZE,
-                y: 0
-            },
-        ]);
+        super(blocks.teal, IPiece.HORIZONTAL);
+    }
+
+    override rotate(): void {
+        for (const block of this.layout) {
+            const temp = block.row;
+            block.row = block.col;
+            block.col = temp;
+            block.sprite.position.set(
+                block.sprite.x = block.col * Config.BLOCK_SIZE,
+                block.sprite.y = block.row * Config.BLOCK_SIZE
+            );
+        }
     }
 }
 
 export class JPiece extends Piece {
     constructor() {
-        super([
+        super(blocks.blue, [
             {
-                texture: blocks.blue,
-                x: 0,
-                y: 2 * Piece.BLOCK_SIZE
+                col: 0,
+                row: 2
             },
             {
-                texture: blocks.blue,
-                x: Piece.BLOCK_SIZE,
-                y: 0
+                col: 1,
+                row: 0
             },
             {
-                texture: blocks.blue,
-                x: Piece.BLOCK_SIZE,
-                y: Piece.BLOCK_SIZE
+                col: 1,
+                row: 1
             },
             {
-                texture: blocks.blue,
-                x: Piece.BLOCK_SIZE,
-                y: 2 * Piece.BLOCK_SIZE
+                col: 1,
+                row: 2
             },
         ]);
+    }
+
+    override rotate(): void {
+
     }
 }
 
 
 export class LPiece extends Piece {
     constructor() {
-        super([
+        super(blocks.orange, [
             {
-                texture: blocks.orange,
-                x: Piece.BLOCK_SIZE,
-                y: 2 * Piece.BLOCK_SIZE
+                col: 1,
+                row: 2
             },
             {
-                texture: blocks.orange,
-                x: 0,
-                y: 0
+                col: 0,
+                row: 0
             },
             {
-                texture: blocks.orange,
-                x: 0,
-                y: Piece.BLOCK_SIZE
+                col: 0,
+                row: 1
             },
             {
-                texture: blocks.orange,
-                x: 0,
-                y: 2 * Piece.BLOCK_SIZE
+                col: 0,
+                row: 2
             },
         ]);
+    }
+
+    override rotate(): void {
+
     }
 }
 
 export class OPiece extends Piece {
     constructor() {
-        super([
+        super(blocks.yellow, [
             {
-                texture: blocks.yellow,
-                x: 0,
-                y: 0
+                col: 0,
+                row: 0
             },
             {
-                texture: blocks.yellow,
-                x: Piece.BLOCK_SIZE,
-                y: 0
+                col: 1,
+                row: 0
             },
             {
-                texture: blocks.yellow,
-                x: 0,
-                y: Piece.BLOCK_SIZE
+                col: 0,
+                row: 1
             },
             {
-                texture: blocks.yellow,
-                x: Piece.BLOCK_SIZE,
-                y: Piece.BLOCK_SIZE
+                col: 1,
+                row: 1
             },
         ]);
+    }
+
+    override rotate(): void {
+
     }
 }
 
 export class SPiece extends Piece {
     constructor() {
-        super([
+        super(blocks.green, [
             {
-                texture: blocks.green,
-                x: Piece.BLOCK_SIZE,
-                y: 0
+                col: 1,
+                row: 0
             },
             {
-                texture: blocks.green,
-                x: 2 * Piece.BLOCK_SIZE,
-                y: 0
+                col: 2,
+                row: 0
             },
             {
-                texture: blocks.green,
-                x: 0,
-                y: Piece.BLOCK_SIZE
+                col: 0,
+                row: 1
             },
             {
-                texture: blocks.green,
-                x: Piece.BLOCK_SIZE,
-                y: Piece.BLOCK_SIZE
+                col: 1,
+                row: 1
             },
         ]);
+    }
+
+    override rotate(): void {
+
     }
 }
 
 export class ZPiece extends Piece {
     constructor() {
-        super([
+        super(blocks.red, [
             {
-                texture: blocks.red,
-                x: 0,
-                y: 0
+                col: 0,
+                row: 0
             },
             {
-                texture: blocks.red,
-                x: Piece.BLOCK_SIZE,
-                y: 0
+                col: 1,
+                row: 0
             },
             {
-                texture: blocks.red,
-                x: Piece.BLOCK_SIZE,
-                y: Piece.BLOCK_SIZE
+                col: 1,
+                row: 1
             },
             {
-                texture: blocks.red,
-                x: 2 * Piece.BLOCK_SIZE,
-                y: Piece.BLOCK_SIZE
+                col: 2,
+                row: 1
             },
         ]);
+    }
+
+    override rotate(): void {
+
     }
 }
 
 export class TPiece extends Piece {
     constructor() {
-        super([
+        super(blocks.purple, [
             {
-                texture: blocks.purple,
-                x: 0,
-                y: 0
+                col: 0,
+                row: 0
             },
             {
-                texture: blocks.purple,
-                x: Piece.BLOCK_SIZE,
-                y: 0
+                col: 1,
+                row: 0
             },
             {
-                texture: blocks.purple,
-                x: 2 * Piece.BLOCK_SIZE,
-                y: 0
+                col: 2,
+                row: 0
             },
             {
-                texture: blocks.purple,
-                x: 1 * Piece.BLOCK_SIZE,
-                y: Piece.BLOCK_SIZE
+                col: 1,
+                row: 1
             },
         ]);
     }
+
+    override rotate(): void {
+
+    }
 }
 
-const pieces = [
-    new IPiece(),
-    new JPiece(),
-    new LPiece(),
-    new OPiece(),
-    new SPiece(),
-    new ZPiece(),
-    new TPiece()
-];
+function makePiece() {
+    switch (7 * Math.random() | 0) {
+        case 0:
+            return new IPiece();
+        case 1:
+            return new JPiece();
+        case 2:
+            return new LPiece();
+        case 3:
+            return new OPiece();
+        case 4:
+            return new SPiece();
+        case 5:
+            return new ZPiece();
+        case 6:
+            return new TPiece();
+        default:
+            throw new Error('invalid piece');
+    }
+}
 
-export function randomPiece(): Piece {
-    const piece = pieces[pieces.length * Math.random() | 0];
-    piece.x = Border.WIDTH / 2 - piece.width / 2 + ((piece.width / 2) % Piece.BLOCK_SIZE);
-    piece.y = 0;
+export const randomPiece = (): Piece => {
+    const piece = makePiece();
+    piece.position.set(Config.APP_WIDTH / 2 - piece.width / 2 + ((piece.width / 2) % Config.BLOCK_SIZE), 0);
     return piece;
 }
