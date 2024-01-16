@@ -31,6 +31,7 @@
   const verticalMsRequiredSpeed = 50;
 
   let canMove = true;
+  let tetris: number[] = [];
 
   newPiece();
 
@@ -79,13 +80,20 @@
         canMove = false;
       }
     } else {
-      const tetris = grid.place(piece);
-      if (tetris.length > 0) console.log('tetris', tetris);
-      app.stage.removeChild(piece);
-      newPiece();
-      x = piece.x;
-      y = piece.y;
-      canMove = true;
+      // TODO: make this slower?
+      if (tetris.length > 0) {
+        grid.clear(tetris);
+        tetris.length = 0;
+      } else {
+        tetris = grid.place(piece);
+      }
+      if (tetris.length == 0) {
+        app.stage.removeChild(piece);
+        newPiece();
+        x = piece.x;
+        y = piece.y;
+        canMove = true;
+      }
     }
 
     piece.position.set(x, y);

@@ -69,4 +69,29 @@ export class Grid extends Container {
         }
         return true;
     }
+
+    clear(rows: number[]) {
+        for (const row of rows) {
+            const start = row * Config.GRID_COLS;
+            console.log(rows, row)
+            const end = start + Config.GRID_COLS;
+            for (let i = start; i < end; ++i) {
+                if (this.cells[i] !== null)
+                    this.cells[i]!.tint = 0x333333;
+            }
+        }
+        // const length = (rows[rows.length - 1] - rows[0] + 1) * Config.GRID_COLS;
+        // for (let row = rows[rows.length - 1] + 1; row >= -1; --row) {
+        //     console.log(row);
+        //     const start = row * Config.GRID_COLS;
+        //     const end = start + Config.GRID_COLS;
+        //     for (let i = start; i < end; ++i) {
+        //         const cell = this.cells[i - length] || null;
+        //         this.cells[i] = cell;
+        //         if (cell !== null) {
+        //             cell.y = row * Config.BLOCK_SIZE;
+        //         }
+        //     }
+        // }
+    }
 }
