@@ -12,6 +12,17 @@ export class Grid extends Container {
         this.cells.fill(null);
     }
 
+    getCellAt(row: number, col: number): Sprite | null {
+        return this.cells[row * Config.GRID_COLS + col] || null;
+    }
+
+    setCellAt(row: number, col: number, cell: Sprite | null): void {
+        if (row < 0 || row >= Config.GRID_ROWS)
+            return;
+        if (col < 0 || col >= Config.GRID_COLS)
+            return;
+        this.cells[row * Config.GRID_COLS + col] = cell;
+    }
 
     isFree(index: number): boolean
     isFree(row: number, col: number): boolean
@@ -70,28 +81,33 @@ export class Grid extends Container {
         return true;
     }
 
+    removeRow(row: number) {
+        const start = row * Config.GRID_COLS;
+        const end = start + Config.GRID_COLS;
+        for (let i = start; i < end; ++i) {
+            const cell = this.cells[i];
+            if (cell !== null)
+                this.removeChild(cell);
+        }
+    }
+
+    moveRow(row: number, offset: number) {
+        for (let col = 0; col < Config.GRID_COLS; ++col) {
+            const cell = this.getCellAt(row - offset, col);
+            this.setCellAt(row, col, cell);
+            if (cell !== null)
+                cell.y = row * Config.BLOCK_SIZE;
+        }
+    }
+
     clear(rows: number[]) {
         for (const row of rows) {
-            const start = row * Config.GRID_COLS;
-            console.log(rows, row)
-            const end = start + Config.GRID_COLS;
-            for (let i = start; i < end; ++i) {
-                if (this.cells[i] !== null)
-                    this.cells[i]!.tint = 0x666666;
-            }
+            this.removeRow(row);
         }
-        // const length = (rows[rows.length - 1] - rows[0] + 1) * Config.GRID_COLS;
-        // for (let row = rows[rows.length - 1] + 1; row >= -1; --row) {
-        //     console.log(row);
-        //     const start = row * Config.GRID_COLS;
-        //     const end = start + Config.GRID_COLS;
-        //     for (let i = start; i < end; ++i) {
-        //         const cell = this.cells[i - length] || null;
-        //         this.cells[i] = cell;
-        //         if (cell !== null) {
-        //             cell.y = row * Config.BLOCK_SIZE;
-        //         }
-        //     }
-        // }
+        const index = rows[rows.length - 1];
+        const offset = index - rows[0] + 1;
+        for (let i = index; i >= 0; --i) {
+            this.moveRow(i, offset);
+        }
     }
 }
