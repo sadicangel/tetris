@@ -16,15 +16,15 @@ export class Grid extends Container {
     isFree(index: number): boolean
     isFree(row: number, col: number): boolean
     isFree(row: number, col?: number): boolean {
-        if (col) {
-            if (row < 0 || row > Config.GRID_ROWS)
+        if (typeof col === 'number') {
+            if (row < 0 || row >= Config.GRID_ROWS)
                 return false;
             if (col < 0 || col >= Config.GRID_COLS)
                 return false;
             return this.cells[row * Config.GRID_COLS + col] === null;
         }
         else {
-            if (row < 0 || row > this.cells.length)
+            if (row < 0 || row >= this.cells.length)
                 return false;
             return this.cells[row] === null;
         }
@@ -77,7 +77,7 @@ export class Grid extends Container {
             const end = start + Config.GRID_COLS;
             for (let i = start; i < end; ++i) {
                 if (this.cells[i] !== null)
-                    this.cells[i]!.tint = 0x333333;
+                    this.cells[i]!.tint = 0x666666;
             }
         }
         // const length = (rows[rows.length - 1] - rows[0] + 1) * Config.GRID_COLS;
