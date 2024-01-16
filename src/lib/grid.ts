@@ -1,27 +1,43 @@
 import { Container, Sprite } from "pixi.js";
 import { Config } from "./config.js";
-import type { Piece } from "./piece.js";
+import type { Piece, SPiece } from "./piece.js";
 import type { Block } from "./block.js";
 
 export class Grid extends Container {
-    cells: Array<boolean>;
+    cells: Array<Sprite | null>;
 
     constructor() {
         super();
-        this.cells = new Array<boolean>(Config.GRID_ROWS * Config.GRID_COLS);
-        this.cells.fill(true);
+        this.cells = new Array<Sprite>(Config.GRID_ROWS * Config.GRID_COLS);
+        this.cells.fill(null);
     }
 
-    isFree(row: number, col: number) {
-        if (row < 0 || row > Config.GRID_ROWS)
-            return false;
-        if (col < 0 || col >= Config.GRID_COLS)
-            return false;
-        return this.cells[row * Config.GRID_COLS + col];
+
+    isFree(index: number): boolean
+    isFree(row: number, col: number): boolean
+    isFree(row: number, col?: number): boolean {
+        if (col) {
+            if (row < 0 || row > Config.GRID_ROWS)
+                return false;
+            if (col < 0 || col >= Config.GRID_COLS)
+                return false;
+            return this.cells[row * Config.GRID_COLS + col] === null;
+        }
+        else {
+            if (row < 0 || row > this.cells.length)
+                return false;
+            return this.cells[row] === null;
+        }
     }
 
-    fill(row: number, col: number) {
-        this.cells[row * Config.GRID_COLS + col] = false;
+    fill(row: number, col: number, sprite: Sprite) {
+        this.cells[row * Config.GRID_COLS + col] = sprite;
+        sprite.tint = 0xDDDDDD;
+        sprite.position.set(
+            (col + 1) * Config.BLOCK_SIZE,
+            (row) * Config.BLOCK_SIZE
+        );
+        this.addChild(sprite);
     }
 
     canFit(row: number, col: number, layout: ReadonlyArray<Block>): boolean {
@@ -33,22 +49,24 @@ export class Grid extends Container {
     }
 
     place(piece: Piece): number[] {
+        const set = new Set<number>();
         for (const block of piece.layout) {
             const row = piece.row + block.row;
             const col = piece.col + block.col;
-            this.fill(row, col);
             const sprite = new Sprite(block.texture);
-            sprite.tint = 0xDDDDDD;
-            sprite.position.set(
-                (piece.col + block.col + 1) * Config.BLOCK_SIZE,
-                (piece.row + block.row) * Config.BLOCK_SIZE
-            );
-            this.addChild(sprite);
+            this.fill(row, col, sprite);
+            set.add(row);
         }
-        return piece.layout.map(b => piece.row + b.row);
+        return [...set].filter(r => this.isTetris(r)).sort((a, b) => a - b);
     }
 
-    // isTetris(row: number): boolean {
-
-    // }
+    isTetris(row: number): boolean {
+        const start = row * Config.GRID_COLS;
+        const end = start + Config.GRID_COLS;
+        for (let i = start; i < end; ++i) {
+            if (this.isFree(i))
+                return false;
+        }
+        return true;
+    }
 }

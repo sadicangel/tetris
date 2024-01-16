@@ -79,7 +79,8 @@
         canMove = false;
       }
     } else {
-      grid.place(piece);
+      const tetris = grid.place(piece);
+      if (tetris.length > 0) console.log('tetris', tetris);
       app.stage.removeChild(piece);
       newPiece();
       x = piece.x;
