@@ -1,5 +1,3 @@
-import { Application } from "pixi.js";
-
 const BLOCK_SIZE = 30;
 const GRID_COLS = 10;
 const GRID_ROWS = 20;

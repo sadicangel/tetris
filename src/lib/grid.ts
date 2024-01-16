@@ -1,6 +1,7 @@
 import { Container, Sprite } from "pixi.js";
-import { Piece, SPiece } from "./piece";
-import { Config } from "./config";
+import { Config } from "./config.js";
+import type { Piece } from "./piece.js";
+import type { Block } from "./block.js";
 
 export class Grid extends Container {
     cells: Array<boolean>;
@@ -23,8 +24,8 @@ export class Grid extends Container {
         this.cells[row * Config.GRID_COLS + col] = false;
     }
 
-    canFit(row: number, col: number, piece: Piece): boolean {
-        for (const block of piece.layout) {
+    canFit(row: number, col: number, layout: ReadonlyArray<Block>): boolean {
+        for (const block of layout) {
             if (!this.isFree(row + block.row, col + block.col))
                 return false;
         }
@@ -36,7 +37,7 @@ export class Grid extends Container {
             const row = piece.row + block.row;
             const col = piece.col + block.col;
             this.fill(row, col);
-            const sprite = new Sprite(block.sprite.texture);
+            const sprite = new Sprite(block.texture);
             sprite.tint = 0xDDDDDD;
             sprite.position.set(
                 (piece.col + block.col + 1) * Config.BLOCK_SIZE,

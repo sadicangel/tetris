@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Application } from 'pixi.js';
-  import { Border } from '@lib/border';
-  import { Piece, randomPiece } from '@/lib/piece';
-  import controller from '@lib/controller';
-  import { Grid } from './lib/grid';
-  import { Config } from './lib/config';
+  import { Border } from '@lib/border.js';
+  import { Piece, randomPiece } from '@/lib/piece.js';
+  import controller from '@lib/controller.js';
+  import { Grid } from './lib/grid.js';
+  import { Config } from './lib/config.js';
 
   const app = new Application({ width: Config.APP_WIDTH, height: Config.APP_HEIGHT });
 
@@ -46,9 +46,9 @@
           controller.left !== controller.right || controller.leftTapped !== controller.rightTapped;
         if (hasAnyDirectionHorizontal) {
           if (controller.left || controller.leftTapped) {
-            if (grid.canFit(piece.row, piece.col - 1, piece)) x -= Config.BLOCK_SIZE;
+            if (grid.canFit(piece.row, piece.col - 1, piece.layout)) x -= Config.BLOCK_SIZE;
           } else {
-            if (grid.canFit(piece.row, piece.col + 1, piece)) x += Config.BLOCK_SIZE;
+            if (grid.canFit(piece.row, piece.col + 1, piece.layout)) x += Config.BLOCK_SIZE;
           }
           controller.leftTapped = false;
           controller.rightTapped = false;
@@ -60,7 +60,7 @@
     if (elapsedMsRotate >= rotateMsRequired) {
       elapsedMsRotate = 0;
       if (controller.rotate) {
-        piece.rotate();
+        if (grid.canFit(piece.row, piece.col, piece.nextLayout)) piece.rotateLayout();
       }
     }
 
@@ -68,7 +68,7 @@
     const verticalMsRequired = controller.down
       ? verticalMsRequiredSpeed
       : verticalMsRequiredDefault;
-    if (grid.canFit(piece.row + 1, piece.col, piece)) {
+    if (grid.canFit(piece.row + 1, piece.col, piece.layout)) {
       if (elapsedMsVertical >= verticalMsRequired) {
         elapsedMsVertical = 0;
         y += Config.BLOCK_SIZE;
@@ -117,13 +117,9 @@
         controller.down = true;
         break;
 
-      case 'q':
-      case 'Q':
-        controller.rotate = true;
-        break;
-
-      case 'e':
-      case 'E':
+      case 'w':
+      case 'W':
+      case 'ArrowUp':
         controller.rotate = true;
         break;
 
@@ -155,13 +151,9 @@
         controller.down = false;
         break;
 
-      case 'q':
-      case 'Q':
-        controller.rotate = false;
-        break;
-
-      case 'e':
-      case 'E':
+      case 'w':
+      case 'W':
+      case 'ArrowUp':
         controller.rotate = false;
         break;
     }

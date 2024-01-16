@@ -1,7 +1,7 @@
-import blocks from '@/lib/blocks';
+import blocks from '@/lib/textures.js';
 import { Container, Sprite } from 'pixi.js';
-import { Piece } from './piece';
-import { Config } from './config';
+import { Piece } from './piece.js';
+import { Config } from './config.js';
 
 export class Border extends Container {
     constructor() {
