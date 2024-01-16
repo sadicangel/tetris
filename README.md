@@ -1,3 +1,7 @@
+# Tetris
+
+Tetris game using Svelte + Vite + PixiJS.
+
 # Svelte + Vite
 
 This template should help get you started developing with Svelte in Vite.
