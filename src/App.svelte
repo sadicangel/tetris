@@ -28,7 +28,7 @@
   const rotateMsRequired = 90;
   let elapsedMsRotate = 0;
   const verticalMsRequiredDefault = 1000;
-  const verticalMsRequiredSpeed = 100;
+  const verticalMsRequiredSpeed = 50;
 
   let canMove = true;
 
@@ -101,6 +101,7 @@
         controller.left = true;
         controller.leftTapped = true;
         controller.rightTapped = false;
+        e.preventDefault();
         break;
 
       case 'd':
@@ -109,24 +110,28 @@
         controller.right = true;
         controller.rightTapped = true;
         controller.leftTapped = false;
+        e.preventDefault();
         break;
 
       case 's':
       case 'S':
       case 'ArrowDown':
         controller.down = true;
+        e.preventDefault();
         break;
 
       case 'w':
       case 'W':
       case 'ArrowUp':
         controller.rotate = true;
+        e.preventDefault();
         break;
 
       case ' ':
         app.stage.removeChild(piece);
         piece = randomPiece();
         app.stage.addChild(piece);
+        e.preventDefault();
         break;
     }
   }
@@ -137,24 +142,28 @@
       case 'A':
       case 'ArrowLeft':
         controller.left = false;
+        e.preventDefault();
         break;
 
       case 'd':
       case 'D':
       case 'ArrowRight':
         controller.right = false;
+        e.preventDefault();
         break;
 
       case 's':
       case 'S':
       case 'ArrowDown':
         controller.down = false;
+        e.preventDefault();
         break;
 
       case 'w':
       case 'W':
       case 'ArrowUp':
         controller.rotate = false;
+        e.preventDefault();
         break;
     }
   }

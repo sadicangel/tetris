@@ -32,7 +32,7 @@ export class Grid extends Container {
         return true;
     }
 
-    place(piece: Piece) {
+    place(piece: Piece): number[] {
         for (const block of piece.layout) {
             const row = piece.row + block.row;
             const col = piece.col + block.col;
@@ -45,5 +45,10 @@ export class Grid extends Container {
             );
             this.addChild(sprite);
         }
+        return piece.layout.map(b => piece.row + b.row);
     }
+
+    // isTetris(row: number): boolean {
+
+    // }
 }

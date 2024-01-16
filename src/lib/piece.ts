@@ -63,11 +63,29 @@ export class JPiece extends Piece {
     constructor() {
         super([
             [
-                new Block(textures.blue, 2, 0),
                 new Block(textures.blue, 0, 1),
                 new Block(textures.blue, 1, 1),
-                new Block(textures.blue, 2, 1)
+                new Block(textures.blue, 2, 1),
+                new Block(textures.blue, 2, 0)
             ],
+            [
+                new Block(textures.blue, 0, 0),
+                new Block(textures.blue, 1, 0),
+                new Block(textures.blue, 1, 1),
+                new Block(textures.blue, 1, 2)
+            ],
+            [
+                new Block(textures.blue, 0, 0),
+                new Block(textures.blue, 0, 1),
+                new Block(textures.blue, 1, 0),
+                new Block(textures.blue, 2, 0)
+            ],
+            [
+                new Block(textures.blue, 0, 0),
+                new Block(textures.blue, 0, 1),
+                new Block(textures.blue, 0, 2),
+                new Block(textures.blue, 1, 2)
+            ]
         ]);
     }
 }
@@ -81,6 +99,24 @@ export class LPiece extends Piece {
                 new Block(textures.orange, 1, 0),
                 new Block(textures.orange, 2, 0),
                 new Block(textures.orange, 2, 1)
+            ],
+            [
+                new Block(textures.orange, 0, 0),
+                new Block(textures.orange, 0, 1),
+                new Block(textures.orange, 0, 2),
+                new Block(textures.orange, 1, 0)
+            ],
+            [
+                new Block(textures.orange, 0, 0),
+                new Block(textures.orange, 0, 1),
+                new Block(textures.orange, 1, 1),
+                new Block(textures.orange, 2, 1)
+            ],
+            [
+                new Block(textures.orange, 0, 2),
+                new Block(textures.orange, 1, 0),
+                new Block(textures.orange, 1, 1),
+                new Block(textures.orange, 1, 2)
             ]
         ]);
     }
@@ -111,6 +147,12 @@ export class SPiece extends Piece {
                 new Block(textures.green, 0, 2),
                 new Block(textures.green, 1, 0),
                 new Block(textures.green, 1, 1),
+            ],
+            [
+                new Block(textures.green, 0, 0),
+                new Block(textures.green, 1, 0),
+                new Block(textures.green, 1, 1),
+                new Block(textures.green, 2, 1),
             ]
         ]);
     }
@@ -126,6 +168,12 @@ export class ZPiece extends Piece {
                 new Block(textures.red, 0, 1),
                 new Block(textures.red, 1, 1),
                 new Block(textures.red, 1, 2),
+            ],
+            [
+                new Block(textures.red, 0, 1),
+                new Block(textures.red, 1, 1),
+                new Block(textures.red, 1, 0),
+                new Block(textures.red, 2, 0),
             ]
         ]);
     }
@@ -141,6 +189,24 @@ export class TPiece extends Piece {
                 new Block(textures.purple, 0, 1),
                 new Block(textures.purple, 0, 2),
                 new Block(textures.purple, 1, 1),
+            ],
+            [
+                new Block(textures.purple, 0, 1),
+                new Block(textures.purple, 1, 1),
+                new Block(textures.purple, 2, 1),
+                new Block(textures.purple, 1, 0),
+            ],
+            [
+                new Block(textures.purple, 0, 1),
+                new Block(textures.purple, 1, 0),
+                new Block(textures.purple, 1, 1),
+                new Block(textures.purple, 1, 2),
+            ],
+            [
+                new Block(textures.purple, 0, 0),
+                new Block(textures.purple, 1, 0),
+                new Block(textures.purple, 2, 0),
+                new Block(textures.purple, 1, 1)
             ]
         ]);
     }
@@ -170,7 +236,7 @@ function makePiece() {
 }
 
 export const randomPiece = (): Piece => {
-    const piece = new IPiece(); // makePiece();
+    const piece = makePiece();
     piece.position.set(Config.APP_WIDTH / 2 - piece.width / 2 + ((piece.width / 2) % Config.BLOCK_SIZE), 0);
     return piece;
 }
